@@ -5,7 +5,7 @@
 
 set -e
 
-EC2_HOST="${EC2_HOST:-ec2-35-77-63-110.ap-northeast-1.compute.amazonaws.com}"
+EC2_HOST="${EC2_HOST:-ec2-35-72-159-128.ap-northeast-1.compute.amazonaws.com}"
 SSH_KEY="${SSH_KEY:-~/.ssh/education.pem}"
 
 echo "🚀 Deploying wedding-backend to EC2..."

@@ -38,7 +38,7 @@ cd wedding-backend
 Or manually:
 ```bash
 # Get new tunnel URL
-ssh -i ~/.ssh/education.pem ubuntu@ec2-35-77-63-110.ap-northeast-1.compute.amazonaws.com \
+ssh -i ~/.ssh/education.pem ubuntu@ec2-35-72-159-128.ap-northeast-1.compute.amazonaws.com \
     "sudo journalctl -u cloudflared-tunnel.service -n 50 --no-pager | \
     grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' | tail -1"
 
@@ -92,7 +92,7 @@ Before deploying backend changes:
 
 Check backend logs for CORS-related errors:
 ```bash
-ssh -i ~/.ssh/education.pem ubuntu@ec2-35-77-63-110.ap-northeast-1.compute.amazonaws.com
+ssh -i ~/.ssh/education.pem ubuntu@ec2-35-72-159-128.ap-northeast-1.compute.amazonaws.com
 cd ~/wedding-backend
 sudo docker compose logs backend | grep -i cors
 ```

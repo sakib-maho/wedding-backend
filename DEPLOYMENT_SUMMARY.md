@@ -4,8 +4,8 @@
 
 ### Deployment Details
 
-- **EC2 Instance:** `ec2-3-113-246-24.ap-northeast-1.compute.amazonaws.com`
-- **Backend URL:** `http://ec2-3-113-246-24.ap-northeast-1.compute.amazonaws.com:3001/`
+- **EC2 Instance:** `ec2-35-72-159-128.ap-northeast-1.compute.amazonaws.com`
+- **Backend URL:** `http://ec2-35-72-159-128.ap-northeast-1.compute.amazonaws.com:3001/`
 - **Access Key:** `2ccff3f39c7a4b968f813c3e04f3ea8e`
 - **Admin Email:** `admin@example.com`
 - **Admin Password:** `admin123`
@@ -38,11 +38,11 @@ After configuring the security group, test from your local machine:
 
 ```bash
 # Test health endpoint
-curl http://ec2-3-113-246-24.ap-northeast-1.compute.amazonaws.com:3001/health
+curl http://ec2-35-72-159-128.ap-northeast-1.compute.amazonaws.com:3001/health
 
 # Test API with access key
 curl -H "x-access-key: 2ccff3f39c7a4b968f813c3e04f3ea8e" \
-  http://ec2-3-113-246-24.ap-northeast-1.compute.amazonaws.com:3001/api/v2/config
+  http://ec2-35-72-159-128.ap-northeast-1.compute.amazonaws.com:3001/api/v2/config
 ```
 
 ## 📝 Next Steps
@@ -57,7 +57,7 @@ curl -H "x-access-key: 2ccff3f39c7a4b968f813c3e04f3ea8e" \
 
 ```bash
 # View logs
-ssh -i ~/.ssh/education.pem ubuntu@ec2-3-113-246-24.ap-northeast-1.compute.amazonaws.com
+ssh -i ~/.ssh/education.pem ubuntu@ec2-35-72-159-128.ap-northeast-1.compute.amazonaws.com
 cd ~/wedding-backend
 sudo docker compose logs -f
 

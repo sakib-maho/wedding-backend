@@ -14,7 +14,7 @@ GitHub Pages serves content over HTTPS, but the EC2 backend is HTTP. Browsers bl
 #### Step 1: Install Nginx on EC2
 
 ```bash
-ssh -i ~/.ssh/education.pem ubuntu@ec2-3-113-246-24.ap-northeast-1.compute.amazonaws.com
+ssh -i ~/.ssh/education.pem ubuntu@ec2-35-72-159-128.ap-northeast-1.compute.amazonaws.com
 
 # Update system
 sudo apt update
@@ -87,7 +87,7 @@ If you don't have a domain, use Cloudflare Tunnel:
 #### Step 1: Install Cloudflared
 
 ```bash
-ssh -i ~/.ssh/education.pem ubuntu@ec2-3-113-246-24.ap-northeast-1.compute.amazonaws.com
+ssh -i ~/.ssh/education.pem ubuntu@ec2-35-72-159-128.ap-northeast-1.compute.amazonaws.com
 
 # Download Cloudflared
 wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb

@@ -10,7 +10,7 @@
 
 SSH into your EC2 instance:
 ```bash
-ssh -i ~/.ssh/education.pem ubuntu@ec2-3-113-246-24.ap-northeast-1.compute.amazonaws.com
+ssh -i ~/.ssh/education.pem ubuntu@ec2-35-72-159-128.ap-northeast-1.compute.amazonaws.com
 ```
 
 Install Docker:
@@ -38,14 +38,14 @@ exit
 From your local machine, upload the backend directory:
 ```bash
 cd /Users/sakib/Weeding
-scp -i ~/.ssh/education.pem -r wedding-backend ubuntu@ec2-3-113-246-24.ap-northeast-1.compute.amazonaws.com:~/
+scp -i ~/.ssh/education.pem -r wedding-backend ubuntu@ec2-35-72-159-128.ap-northeast-1.compute.amazonaws.com:~/
 ```
 
 ## Step 3: Configure Environment
 
 SSH back into EC2:
 ```bash
-ssh -i ~/.ssh/education.pem ubuntu@ec2-3-113-246-24.ap-northeast-1.compute.amazonaws.com
+ssh -i ~/.ssh/education.pem ubuntu@ec2-35-72-159-128.ap-northeast-1.compute.amazonaws.com
 cd ~/wedding-backend
 ```
 
@@ -93,7 +93,7 @@ In AWS Console:
 
 Update `undangan/index.html` and `undangan/dashboard.html`:
 ```html
-<body data-key="YOUR_ACCESS_KEY" data-url="http://ec2-3-113-246-24.ap-northeast-1.compute.amazonaws.com:3001/" ...>
+<body data-key="YOUR_ACCESS_KEY" data-url="http://ec2-35-72-159-128.ap-northeast-1.compute.amazonaws.com:3001/" ...>
 ```
 
 ## Useful Commands
