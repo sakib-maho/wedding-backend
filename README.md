@@ -115,6 +115,24 @@ The frontend connects to this backend via the `data-url` attribute:
 
 See `DEPLOY.md` for AWS EC2 deployment instructions.
 
+### Quick Deploy
+
+```bash
+./scripts/deploy.sh
+```
+
+### Update Tunnel URL (After EC2 Restart)
+
+```bash
+./scripts/update-tunnel-url.sh
+```
+
+## 🔒 CORS Configuration
+
+The backend includes comprehensive CORS configuration to prevent cross-origin issues. See:
+- `CORS_GUIDE.md` - Detailed CORS documentation
+- `PREVENTING_CORS_ISSUES.md` - How to prevent CORS issues
+
 ## 📄 License
 
 MIT

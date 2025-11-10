@@ -13,10 +13,17 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
+// CORS Configuration - DO NOT MODIFY without testing
+// This configuration ensures all frontend requests work correctly
+// If you need to restrict origins, update the 'origin' field
 app.use(cors({
-    origin: '*',
-    credentials: true
+    origin: '*',  // Allow all origins (change to specific domains for production)
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-access-key'],
+    exposedHeaders: ['Content-Type', 'Authorization'],
+    preflightContinue: false,  // Let CORS middleware handle preflight
+    optionsSuccessStatus: 204  // Return 204 for OPTIONS requests
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -27,6 +34,16 @@ app.set('trust proxy', true);
 // Health check endpoint
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// CORS test endpoint - helps verify CORS is working correctly
+app.get('/api/cors-test', (req, res) => {
+    res.json({
+        cors: 'configured',
+        origin: req.headers.origin || 'none',
+        method: req.method,
+        timestamp: new Date().toISOString()
+    });
 });
 
 // Admin dashboard route (before static files)
