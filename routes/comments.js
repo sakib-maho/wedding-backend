@@ -366,8 +366,17 @@ router.post('/comment/:uuid', verifyAuth, async (req, res) => {
             [uuid, userIdentifier, new Date().toISOString()]
         );
 
+        // Get updated like count
+        const likeCount = await db.get(
+            'SELECT COUNT(*) as count FROM likes WHERE comment_uuid = $1',
+            [uuid]
+        );
+
         return res.status(200).json({
-            data: { status: true }
+            data: { 
+                status: true,
+                like_count: parseInt(likeCount?.count || 0)
+            }
         });
     } catch (error) {
         console.error('Like comment error:', error);
@@ -406,8 +415,17 @@ router.patch('/comment/:uuid', verifyAuth, async (req, res) => {
             [uuid, userIdentifier]
         );
 
+        // Get updated like count
+        const likeCount = await db.get(
+            'SELECT COUNT(*) as count FROM likes WHERE comment_uuid = $1',
+            [uuid]
+        );
+
         return res.status(200).json({
-            data: { status: true }
+            data: { 
+                status: true,
+                like_count: parseInt(likeCount?.count || 0)
+            }
         });
     } catch (error) {
         console.error('Unlike comment error:', error);
