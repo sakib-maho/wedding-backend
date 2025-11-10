@@ -58,8 +58,44 @@ class Database {
         const schemaPath = join(__dirname, 'database/schema.sql');
         const schema = readFileSync(schemaPath, 'utf8');
         
-        // Execute schema (PostgreSQL handles IF NOT EXISTS)
-        await this.pool.query(schema);
+        // Remove comments and split into statements
+        const lines = schema.split('\n');
+        let currentStatement = '';
+        
+        for (let line of lines) {
+            // Remove single-line comments (both -- and #)
+            line = line.replace(/--.*$/, '').replace(/#.*$/, '').trim();
+            if (!line) continue;
+            
+            currentStatement += line + ' ';
+            
+            // Execute when we hit a semicolon
+            if (line.endsWith(';')) {
+                const stmt = currentStatement.trim();
+                if (stmt) {
+                    try {
+                        await this.pool.query(stmt);
+                    } catch (err) {
+                        // Ignore "already exists" errors
+                        if (!err.message.includes('already exists') && !err.message.includes('duplicate')) {
+                            console.warn('SQL execution warning:', err.message);
+                        }
+                    }
+                }
+                currentStatement = '';
+            }
+        }
+        
+        // Execute any remaining statement
+        if (currentStatement.trim()) {
+            try {
+                await this.pool.query(currentStatement.trim());
+            } catch (err) {
+                if (!err.message.includes('already exists') && !err.message.includes('duplicate')) {
+                    console.warn('SQL execution warning:', err.message);
+                }
+            }
+        }
     }
 
     async createDefaultAdmin() {
