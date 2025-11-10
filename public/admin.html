@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Wedding Backend</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .login-form {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .login-form input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .login-form button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .login-form button:hover {
+            background: #5568d3;
+        }
+        .reply-indent {
+            padding-left: 30px;
+            border-left: 3px solid #667eea;
+            margin-left: 20px;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div id="login-container" class="login-form">
+        <h2>Admin Login</h2>
+        <div id="login-error" class="error" style="display: none;"></div>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button onclick="login()">Login</button>
+    </div>
+
+    <div id="dashboard-container" class="container" style="display: none;">
+        <div class="header">
+            <h1>🎉 Wedding Invitation Admin Dashboard</h1>
+            <p>Backend API: <strong id="api-url"></strong></p>
+            <button onclick="logout()" style="float: right; padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">Logout</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Total Comments</h3>
+                <div class="value" id="stat-comments">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Will Attend</h3>
+                <div class="value" id="stat-present">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Won't Attend</h3>
+                <div class="value" id="stat-absent">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Likes</h3>
+                <div class="value" id="stat-likes">-</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>All Comments</h2>
+            <div id="comments-loading" class="loading">Loading comments...</div>
+            <div id="comments-error" class="error" style="display: none;"></div>
+            <div id="comments-container"></div>
+        </div>
+
+        <div class="section">
+            <h2>Users</h2>
+            <div id="users-loading" class="loading">Loading users...</div>
+            <div id="users-error" class="error" style="display: none;"></div>
+            <div id="users-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin;
+        let authToken = localStorage.getItem('admin_token');
+
+        // Check if already logged in
+        if (authToken) {
+            showDashboard();
+        } else {
+            document.getElementById('login-container').style.display = 'block';
+        }
+
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('login-error');
+
+            try {
+                const response = await fetch(`${API_URL}/api/session`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.data.token) {
+                    authToken = data.data.token;
+                    localStorage.setItem('admin_token', authToken);
+                    showDashboard();
+                } else {
+                    errorDiv.textContent = data.error?.[0] || 'Login failed';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Connection error: ' + error.message;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function logout() {
+            authToken = null;
+            localStorage.removeItem('admin_token');
+            document.getElementById('login-container').style.display = 'block';
+            document.getElementById('dashboard-container').style.display = 'none';
+        }
+
+        async function showDashboard() {
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('dashboard-container').style.display = 'block';
+            document.getElementById('api-url').textContent = API_URL;
+
+            await loadStats();
+            await loadComments();
+            await loadUsers();
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_URL}/api/stats`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('stat-comments').textContent = data.data.comments || 0;
+                    document.getElementById('stat-present').textContent = data.data.present || 0;
+                    document.getElementById('stat-absent').textContent = data.data.absent || 0;
+                    document.getElementById('stat-likes').textContent = data.data.likes || 0;
+                }
+            } catch (error) {
+                console.error('Stats error:', error);
+            }
+        }
+
+        async function loadComments() {
+            const container = document.getElementById('comments-container');
+            const loading = document.getElementById('comments-loading');
+            const errorDiv = document.getElementById('comments-error');
+
+            try {
+                const response = await fetch(`${API_URL}/api/admin/comments?per=100&next=0`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    loading.style.display = 'none';
+                    errorDiv.style.display = 'none';
+
+                    if (data.data.lists.length === 0) {
+                        container.innerHTML = '<p>No comments yet.</p>';
+                        return;
+                    }
+
+                    let html = '<table><thead><tr><th>Name</th><th>Presence</th><th>Comment</th><th>Likes</th><th>Date</th><th>IP</th><th>Actions</th></tr></thead><tbody>';
+                    
+                    data.data.lists.forEach(comment => {
+                        html += renderComment(comment, 0);
+                    });
+
+                    html += '</tbody></table>';
+                    container.innerHTML = html;
+                } else {
+                    loading.style.display = 'none';
+                    errorDiv.textContent = data.error?.[0] || 'Failed to load comments';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                errorDiv.textContent = 'Error: ' + error.message;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function renderComment(comment, depth) {
+            const indent = depth > 0 ? 'reply-indent' : '';
+            const presenceBadge = comment.presence 
+                ? '<span class="badge badge-success">✓ Will Attend</span>' 
+                : '<span class="badge badge-danger">✗ Won\'t Attend</span>';
+            
+            const date = new Date(comment.created_at).toLocaleString();
+            const commentText = comment.comment || '<em>No comment text</em>';
+            const ipDisplay = comment.ip ? `<small>${comment.ip}</small>` : '-';
+
+            let html = `
+                <tr class="${indent}">
+                    <td><strong>${escapeHtml(comment.name)}</strong> ${comment.is_admin ? '<span class="badge badge-info">Admin</span>' : ''}</td>
+                    <td>${presenceBadge}</td>
+                    <td>${escapeHtml(commentText)}</td>
+                    <td>${comment.like_count || 0}</td>
+                    <td><small>${date}</small></td>
+                    <td>${ipDisplay}</td>
+                    <td class="actions">
+                        <button class="btn btn-danger" onclick="deleteComment('${comment.uuid}')">Delete</button>
+                    </td>
+                </tr>
+            `;
+
+            // Render replies
+            if (comment.comments && comment.comments.length > 0) {
+                comment.comments.forEach(reply => {
+                    html += renderComment(reply, depth + 1);
+                });
+            }
+
+            return html;
+        }
+
+        async function loadUsers() {
+            const container = document.getElementById('users-container');
+            const loading = document.getElementById('users-loading');
+            const errorDiv = document.getElementById('users-error');
+
+            try {
+                const response = await fetch(`${API_URL}/api/admin/users`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    loading.style.display = 'none';
+                    errorDiv.style.display = 'none';
+
+                    const users = data.data || [];
+                    if (users.length === 0) {
+                        container.innerHTML = '<p>No users found.</p>';
+                        return;
+                    }
+
+                    let html = '<table><thead><tr><th>Email</th><th>Access Key</th><th>Settings</th><th>Created</th></tr></thead><tbody>';
+                    users.forEach(user => {
+                        html += `
+                            <tr>
+                                <td>${escapeHtml(user.email)}</td>
+                                <td><code style="font-size: 11px;">${user.access_key}</code></td>
+                                <td>
+                                    Reply: ${user.can_reply ? '✓' : '✗'} | 
+                                    Edit: ${user.can_edit ? '✓' : '✗'} | 
+                                    Delete: ${user.can_delete ? '✓' : '✗'} |
+                                    Confetti: ${user.is_confetti_animation ? '✓' : '✗'}
+                                </td>
+                                <td><small>${new Date(user.created_at).toLocaleString()}</small></td>
+                            </tr>
+                        `;
+                    });
+                    html += '</tbody></table>';
+                    container.innerHTML = html;
+                } else {
+                    loading.style.display = 'none';
+                    errorDiv.textContent = data.error?.[0] || 'Failed to load users';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                errorDiv.textContent = 'Error: ' + error.message;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        async function deleteComment(uuid) {
+            if (!confirm('Are you sure you want to delete this comment?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/comment/${uuid}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    alert('Comment deleted successfully');
+                    loadComments();
+                    loadStats();
+                } else {
+                    const data = await response.json();
+                    alert('Error: ' + (data.error?.[0] || 'Failed to delete'));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            if (authToken) {
+                loadStats();
+                loadComments();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
+

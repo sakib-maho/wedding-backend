@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.js';
 import configRoutes from './routes/config.js';
 import commentRoutes from './routes/comments.js';
 import statsRoutes from './routes/stats.js';
+import adminRoutes from './routes/admin.js';
 
 dotenv.config();
 
@@ -28,11 +29,18 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Admin dashboard route (before static files)
+app.use('/', adminRoutes);
+
+// Serve static files (admin dashboard)
+app.use(express.static('public'));
+
 // API Routes
 app.use('/api', authRoutes);
 app.use('/api', configRoutes);
 app.use('/api', commentRoutes);
 app.use('/api', statsRoutes);
+app.use('/api', adminRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -57,6 +65,7 @@ async function startServer() {
         app.listen(PORT, '0.0.0.0', () => {
             console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
             console.log(`📊 Health check: http://localhost:${PORT}/health`);
+            console.log(`👨‍💼 Admin Dashboard: http://localhost:${PORT}/admin`);
             console.log(`\n📝 Default admin credentials:`);
             console.log(`   Email: ${process.env.DEFAULT_ADMIN_EMAIL || 'admin@example.com'}`);
             console.log(`   Password: ${process.env.DEFAULT_ADMIN_PASSWORD || 'admin123'}`);
@@ -82,4 +91,3 @@ process.on('SIGTERM', async () => {
     await db.close();
     process.exit(0);
 });
-
