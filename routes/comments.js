@@ -31,23 +31,62 @@ router.get('/v2/comment', verifyAuth, async (req, res) => {
             [per, next]
         );
 
+        // Recursive function to get all replies (including nested replies)
+        const getRepliesRecursive = async (parentUuid) => {
+            const replies = await db.all(
+                `SELECT uuid, own, name, presence, comment, gif_url, ip, user_agent, 
+                        is_admin, created_at, updated_at, parent_uuid
+                 FROM comments 
+                 WHERE parent_uuid = $1 
+                 ORDER BY created_at ASC`,
+                [parentUuid]
+            );
+
+            // Get like count for each reply and recursively get nested replies
+            const repliesWithNested = await Promise.all(
+                replies.map(async (reply) => {
+                    const likeCount = await db.get(
+                        'SELECT COUNT(*) as count FROM likes WHERE comment_uuid = $1',
+                        [reply.uuid]
+                    );
+
+                    // Recursively get nested replies
+                    const nestedReplies = await getRepliesRecursive(reply.uuid);
+
+                    return {
+                        uuid: reply.uuid,
+                        own: reply.own,
+                        name: reply.name,
+                        presence: Boolean(reply.presence),
+                        comment: reply.comment,
+                        gif_url: reply.gif_url,
+                        ip: reply.ip,
+                        user_agent: reply.user_agent,
+                        is_admin: Boolean(reply.is_admin),
+                        is_parent: false,
+                        parent_uuid: reply.parent_uuid,
+                        like_count: parseInt(likeCount?.count || 0),
+                        created_at: reply.created_at,
+                        updated_at: reply.updated_at,
+                        comments: nestedReplies
+                    };
+                })
+            );
+
+            return repliesWithNested;
+        };
+
         // Get replies for each comment
         const commentsWithReplies = await Promise.all(
             topLevelComments.map(async (comment) => {
-                const replies = await db.all(
-                    `SELECT uuid, own, name, presence, comment, gif_url, ip, user_agent, 
-                            is_admin, created_at, updated_at, parent_uuid
-                     FROM comments 
-                     WHERE parent_uuid = $1 
-                     ORDER BY created_at ASC`,
-                    [comment.uuid]
-                );
-
                 // Get like count for this comment
                 const likeCount = await db.get(
                     'SELECT COUNT(*) as count FROM likes WHERE comment_uuid = $1',
                     [comment.uuid]
                 );
+
+                // Get all replies recursively
+                const replies = await getRepliesRecursive(comment.uuid);
 
                 return {
                     uuid: comment.uuid,
@@ -64,25 +103,7 @@ router.get('/v2/comment', verifyAuth, async (req, res) => {
                     like_count: parseInt(likeCount?.count || 0),
                     created_at: comment.created_at,
                     updated_at: comment.updated_at,
-                    comments: replies.map(reply => {
-                        return {
-                            uuid: reply.uuid,
-                            own: reply.own,
-                            name: reply.name,
-                            presence: Boolean(reply.presence),
-                            comment: reply.comment,
-                            gif_url: reply.gif_url,
-                            ip: reply.ip,
-                            user_agent: reply.user_agent,
-                            is_admin: Boolean(reply.is_admin),
-                            is_parent: false,
-                            parent_uuid: reply.parent_uuid,
-                            like_count: 0,
-                            created_at: reply.created_at,
-                            updated_at: reply.updated_at,
-                            comments: []
-                        };
-                    })
+                    comments: replies
                 };
             })
         );

@@ -70,19 +70,27 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: auto;
         }
         th, td {
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #eee;
+            vertical-align: top;
         }
         th {
             background: #f8f9fa;
             font-weight: 600;
             color: #333;
+            position: sticky;
+            top: 0;
         }
         tr:hover {
             background: #f8f9fa;
+        }
+        td.actions {
+            white-space: nowrap;
+            min-width: 150px;
         }
         .badge {
             display: inline-block;
@@ -153,6 +161,11 @@
         .actions {
             display: flex;
             gap: 10px;
+            white-space: nowrap;
+            min-width: 150px;
+        }
+        .actions .btn {
+            flex-shrink: 0;
         }
         .btn {
             padding: 6px 12px;
@@ -165,8 +178,36 @@
             background: #dc3545;
             color: white;
         }
-        .btn-danger:hover {
-            background: #c82333;
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        .reply-form {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: none;
+        }
+        .reply-form.active {
+            display: block;
+        }
+        .reply-form textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 60px;
+            margin-bottom: 8px;
+        }
+        .reply-form .btn-group {
+            display: flex;
+            gap: 8px;
         }
     </style>
 </head>
@@ -345,15 +386,27 @@
             const ipDisplay = comment.ip ? `<small>${comment.ip}</small>` : '-';
 
             let html = `
-                <tr class="${indent}">
+                <tr class="${indent}" id="comment-row-${comment.uuid}">
                     <td><strong>${escapeHtml(comment.name)}</strong> ${comment.is_admin ? '<span class="badge badge-info">Admin</span>' : ''}</td>
                     <td>${presenceBadge}</td>
                     <td>${escapeHtml(commentText)}</td>
                     <td>${comment.like_count || 0}</td>
                     <td><small>${date}</small></td>
                     <td>${ipDisplay}</td>
-                    <td class="actions">
+                    <td class="actions" style="white-space: nowrap;">
+                        <button class="btn btn-primary" onclick="showReplyForm('${comment.uuid}')" style="margin-right: 5px;">Reply</button>
                         <button class="btn btn-danger" onclick="deleteComment('${comment.uuid}')">Delete</button>
+                    </td>
+                </tr>
+                <tr class="${indent}" id="reply-form-row-${comment.uuid}" style="display: none;">
+                    <td colspan="7">
+                        <div class="reply-form" id="reply-form-${comment.uuid}">
+                            <textarea id="reply-text-${comment.uuid}" placeholder="Type your reply as Sakib&Shabrina..."></textarea>
+                            <div class="btn-group">
+                                <button class="btn btn-primary" onclick="submitReply('${comment.uuid}')">Send Reply</button>
+                                <button class="btn" onclick="hideReplyForm('${comment.uuid}')" style="background: #6c757d; color: white;">Cancel</button>
+                            </div>
+                        </div>
                     </td>
                 </tr>
             `;
@@ -416,6 +469,65 @@
                 loading.style.display = 'none';
                 errorDiv.textContent = 'Error: ' + error.message;
                 errorDiv.style.display = 'block';
+            }
+        }
+
+        function showReplyForm(uuid) {
+            const formRow = document.getElementById(`reply-form-row-${uuid}`);
+            const form = document.getElementById(`reply-form-${uuid}`);
+            if (formRow && form) {
+                formRow.style.display = '';
+                form.classList.add('active');
+                document.getElementById(`reply-text-${uuid}`).focus();
+            }
+        }
+
+        function hideReplyForm(uuid) {
+            const formRow = document.getElementById(`reply-form-row-${uuid}`);
+            const form = document.getElementById(`reply-form-${uuid}`);
+            if (formRow && form) {
+                formRow.style.display = 'none';
+                form.classList.remove('active');
+                document.getElementById(`reply-text-${uuid}`).value = '';
+            }
+        }
+
+        async function submitReply(parentUuid) {
+            const textarea = document.getElementById(`reply-text-${parentUuid}`);
+            const comment = textarea.value.trim();
+
+            if (!comment) {
+                alert('Please enter a reply');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/admin/reply`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        parent_uuid: parentUuid,
+                        comment: comment
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    textarea.value = '';
+                    hideReplyForm(parentUuid);
+                    alert('Reply posted successfully as Sakib&Shabrina!');
+                    // Reload comments to show the new reply
+                    loadComments();
+                    loadStats();
+                } else {
+                    alert('Error: ' + (data.error?.[0] || 'Failed to post reply'));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
             }
         }
 

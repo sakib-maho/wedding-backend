@@ -1,6 +1,7 @@
 import express from 'express';
 import { db } from '../db.js';
 import { verifyAdminToken } from '../middleware/auth.js';
+import { v4 as uuidv4 } from 'uuid';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -182,6 +183,127 @@ router.get('/admin/database-stats', verifyAdminToken, async (req, res) => {
         });
     } catch (error) {
         console.error('Get database stats error:', error);
+        return res.status(500).json({
+            error: ['Internal server error']
+        });
+    }
+});
+
+/**
+ * POST /api/admin/reply
+ * Reply to a comment as admin (Sakib&Shabrina)
+ */
+router.post('/admin/reply', verifyAdminToken, async (req, res) => {
+    try {
+        const { parent_uuid, comment } = req.body;
+        const userAgent = req.headers['user-agent'] || '';
+        const ip = req.ip || req.connection.remoteAddress;
+
+        if (!parent_uuid || !comment) {
+            return res.status(400).json({
+                error: ['Parent UUID and comment are required']
+            });
+        }
+
+        // Verify parent comment exists
+        const parentComment = await db.get(
+            'SELECT uuid FROM comments WHERE uuid = $1',
+            [parent_uuid]
+        );
+
+        if (!parentComment) {
+            return res.status(404).json({
+                error: ['Parent comment not found']
+            });
+        }
+
+        // Get admin user info
+        const adminUser = req.user; // Set by verifyAdminToken middleware
+        
+        console.log('Admin user from req.user:', { id: adminUser.id, email: adminUser.email, hasAccessKey: !!adminUser.access_key });
+        
+        // Use access_key from req.user (already fetched by middleware)
+        // If not available, fetch it explicitly
+        let accessKey = adminUser.access_key;
+        
+        if (!accessKey) {
+            console.log('Access key not in req.user, fetching from database...');
+            const fullUser = await db.get(
+                'SELECT access_key FROM users WHERE id = $1',
+                [adminUser.id]
+            );
+            accessKey = fullUser?.access_key;
+            console.log('Fetched access_key from DB:', accessKey ? accessKey.substring(0, 8) + '...' : 'null');
+        }
+        
+        if (!accessKey) {
+            console.error('Admin user has no access_key:', adminUser);
+            return res.status(500).json({
+                error: ['Admin user access key not found. Please ensure the admin user has an access key.']
+            });
+        }
+        
+        console.log('Using access_key for admin reply:', accessKey.substring(0, 8) + '...');
+
+        const uuid = uuidv4();
+        const now = new Date().toISOString();
+        const adminName = 'Sakib&Shabrina';
+
+        // Create reply as admin
+        await db.run(
+            `INSERT INTO comments (uuid, own, name, presence, comment, gif_url, ip, user_agent, is_admin, parent_uuid, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+            [
+                uuid,
+                accessKey,
+                adminName,
+                true, // Admin replies always have presence = true
+                comment,
+                null, // No GIF for admin replies
+                ip,
+                userAgent,
+                true, // Mark as admin
+                parent_uuid,
+                now,
+                now
+            ]
+        );
+
+        // Fetch the created reply
+        const createdReply = await db.get(
+            `SELECT uuid, own, name, presence, comment, gif_url, ip, user_agent, 
+                    is_admin, created_at, updated_at, parent_uuid
+             FROM comments WHERE uuid = $1`,
+            [uuid]
+        );
+
+        // Get like count (should be 0 for new reply)
+        const likeCount = await db.get(
+            'SELECT COUNT(*) as count FROM likes WHERE comment_uuid = $1',
+            [uuid]
+        );
+
+        return res.status(201).json({
+            data: {
+                uuid: createdReply.uuid,
+                own: createdReply.own,
+                name: createdReply.name,
+                presence: Boolean(createdReply.presence),
+                comment: createdReply.comment,
+                gif_url: createdReply.gif_url,
+                ip: createdReply.ip,
+                user_agent: createdReply.user_agent,
+                is_admin: Boolean(createdReply.is_admin),
+                is_parent: false,
+                parent_uuid: createdReply.parent_uuid,
+                like_count: parseInt(likeCount?.count || 0),
+                created_at: createdReply.created_at,
+                updated_at: createdReply.updated_at,
+                comments: []
+            }
+        });
+    } catch (error) {
+        console.error('Admin reply error:', error);
         return res.status(500).json({
             error: ['Internal server error']
         });

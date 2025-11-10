@@ -20,7 +20,7 @@ export const verifyAdminToken = async (req, res, next) => {
         
         try {
             const decoded = jwt.verify(token, JWT_SECRET);
-            const user = await db.get('SELECT id, email FROM users WHERE id = $1', [decoded.userId]);
+            const user = await db.get('SELECT id, email, access_key FROM users WHERE id = $1', [decoded.userId]);
             
             if (!user) {
                 return res.status(401).json({
