@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Wedding Backend</title>
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.2);
+            animation: fadeIn 0.6s ease-out;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .header:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.3);
+        }
+
+        .header h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.3);
+        }
+
+        .stat-card h3 {
+            color: #718096;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover .value {
+            transform: scale(1.1);
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.2);
+            animation: fadeIn 0.8s ease-out;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.3);
+        }
+
+        .section h2 {
+            color: #2d3748;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid;
+            border-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) 1;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+            transition: background-color 0.2s ease;
+        }
+
+        th {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            font-weight: 700;
+            color: #2d3748;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            animation: slideIn 0.4s ease-out;
+            animation-fill-mode: both;
+        }
+
+        tbody tr:nth-child(odd) {
+            background: rgba(247, 250, 252, 0.5);
+        }
+
+        tbody tr:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            transform: scale(1.01);
+            transition: all 0.2s ease;
+        }
+
+        td.actions {
+            white-space: nowrap;
+            min-width: 150px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .badge:hover {
+            transform: scale(1.1);
+        }
+
+        .badge-success {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .badge-danger {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 101, 101, 0.3);
+        }
+
+        .badge-info {
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #667eea;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 10px;
+        }
+
+        .error {
+            background: linear-gradient(135deg, #fed7d7 0%, #fc8181 100%);
+            color: #742a2a;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(245, 101, 101, 0.2);
+            animation: slideIn 0.3s ease-out;
+            border-left: 4px solid #e53e3e;
+        }
+
+        .login-form {
+            max-width: 450px;
+            margin: 100px auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 50px;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.2);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2d3748;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .login-form input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .login-form button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .login-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .login-form button:active {
+            transform: translateY(0);
+        }
+
+        .reply-indent {
+            padding-left: 30px;
+            border-left: 3px solid;
+            border-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) 1;
+            margin-left: 20px;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            white-space: nowrap;
+            min-width: 150px;
+        }
+
+        .actions .btn {
+            flex-shrink: 0;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 101, 101, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245, 101, 101, 0.4);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .logout-btn {
+            float: right;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(245, 101, 101, 0.3);
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245, 101, 101, 0.4);
+        }
+
+        .reply-form {
+            margin-top: 10px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(247, 250, 252, 0.8) 0%, rgba(237, 242, 247, 0.8) 100%);
+            border-radius: 12px;
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .reply-form.active {
+            display: block;
+        }
+
+        .reply-form textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 80px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .reply-form textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .reply-form .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .reply-form .btn {
+            flex: 1;
+        }
+
+        code {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 1024px) {
+            .container {
+                padding: 0 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .stat-card {
+                padding: 20px;
+            }
+
+            .stat-card .value {
+                font-size: 2rem;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            .section h2 {
+                font-size: 1.25rem;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 10px 8px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                max-width: 100%;
+                padding: 0;
+            }
+
+            .header {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.25rem;
+                margin-bottom: 8px;
+            }
+
+            .header p {
+                font-size: 0.8rem;
+                margin-bottom: 10px;
+            }
+
+            .logout-btn {
+                float: none;
+                width: 100%;
+                margin-top: 10px;
+                padding: 12px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+
+            .stat-card {
+                padding: 20px;
+            }
+
+            .stat-card h3 {
+                font-size: 0.75rem;
+            }
+
+            .stat-card .value {
+                font-size: 1.75rem;
+            }
+
+            .section {
+                padding: 15px;
+                margin-bottom: 20px;
+                border-radius: 15px;
+            }
+
+            .section h2 {
+                font-size: 1.1rem;
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+            }
+
+            /* Make tables horizontally scrollable on mobile */
+            .section {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            table {
+                min-width: 600px;
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 10px 6px;
+                font-size: 0.8rem;
+            }
+
+            th {
+                font-size: 0.7rem;
+                padding: 8px 6px;
+            }
+
+            .badge {
+                font-size: 0.65rem;
+                padding: 4px 8px;
+                display: inline-block;
+                margin: 2px;
+            }
+
+            .actions {
+                flex-direction: column;
+                gap: 5px;
+                min-width: auto;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 10px;
+                font-size: 0.8rem;
+            }
+
+            .reply-indent {
+                padding-left: 15px;
+                margin-left: 10px;
+            }
+
+            .login-form {
+                margin: 50px auto;
+                padding: 30px 20px;
+                max-width: 100%;
+                border-radius: 20px;
+            }
+
+            .login-form h2 {
+                font-size: 1.5rem;
+                margin-bottom: 20px;
+            }
+
+            .login-form input {
+                padding: 12px 15px;
+                font-size: 0.95rem;
+            }
+
+            .login-form button {
+                padding: 12px;
+                font-size: 1rem;
+            }
+
+            .reply-form {
+                padding: 15px;
+            }
+
+            .reply-form textarea {
+                font-size: 0.85rem;
+                min-height: 70px;
+            }
+
+            .reply-form .btn-group {
+                flex-direction: column;
+            }
+
+            .reply-form .btn {
+                width: 100%;
+            }
+
+            .loading {
+                padding: 40px 20px;
+                font-size: 1rem;
+            }
+
+            .error {
+                padding: 15px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .header {
+                padding: 12px;
+            }
+
+            .header h1 {
+                font-size: 1.1rem;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-card .value {
+                font-size: 1.5rem;
+            }
+
+            .section {
+                padding: 12px;
+            }
+
+            table {
+                min-width: 500px;
+                font-size: 0.75rem;
+            }
+
+            th, td {
+                padding: 8px 4px;
+                font-size: 0.75rem;
+            }
+
+            th {
+                font-size: 0.65rem;
+            }
+
+            .login-form {
+                padding: 25px 15px;
+            }
+
+            .login-form h2 {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* Landscape orientation adjustments for tablets */
+        @media (max-width: 1024px) and (orientation: landscape) {
+            .stats {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* Touch-friendly adjustments */
+        @media (hover: none) and (pointer: coarse) {
+            .btn {
+                min-height: 44px;
+            }
+
+            .login-form input {
+                min-height: 44px;
+            }
+
+            .stat-card:hover {
+                transform: none;
+            }
+
+            .section:hover {
+                transform: none;
+            }
+
+            tbody tr:hover {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="login-container" class="login-form">
+        <h2>🔐 Admin Login</h2>
+        <div id="login-error" class="error" style="display: none;"></div>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button onclick="login()">Login</button>
+    </div>
+
+    <div id="dashboard-container" class="container" style="display: none;">
+        <div class="header">
+            <h1>🎉 Wedding Invitation Admin Dashboard</h1>
+            <p>Backend API: <strong id="api-url"></strong></p>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Total Comments</h3>
+                <div class="value" id="stat-comments">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Will Attend</h3>
+                <div class="value" id="stat-present">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Won't Attend</h3>
+                <div class="value" id="stat-absent">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Likes</h3>
+                <div class="value" id="stat-likes">-</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💬 All Comments</h2>
+            <div id="comments-loading" class="loading">Loading comments</div>
+            <div id="comments-error" class="error" style="display: none;"></div>
+            <div id="comments-container"></div>
+        </div>
+
+        <div class="section">
+            <h2>👥 Users</h2>
+            <div id="users-loading" class="loading">Loading users</div>
+            <div id="users-error" class="error" style="display: none;"></div>
+            <div id="users-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin;
+        let authToken = localStorage.getItem('admin_token');
+
+        // Animate number counting
+        function animateValue(element, start, end, duration) {
+            if (start === end || start === '-' || isNaN(start)) {
+                element.textContent = end;
+                return;
+            }
+            
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const current = Math.floor(progress * (end - start) + start);
+                element.textContent = current;
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    element.textContent = end;
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // Check if already logged in
+        if (authToken) {
+            showDashboard();
+        } else {
+            document.getElementById('login-container').style.display = 'block';
+        }
+
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('login-error');
+            const button = event.target;
+
+            button.textContent = 'Logging in...';
+            button.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/api/session`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.data.token) {
+                    authToken = data.data.token;
+                    localStorage.setItem('admin_token', authToken);
+                    showDashboard();
+                } else {
+                    errorDiv.textContent = data.error?.[0] || 'Login failed';
+                    errorDiv.style.display = 'block';
+                    button.textContent = 'Login';
+                    button.disabled = false;
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Connection error: ' + error.message;
+                errorDiv.style.display = 'block';
+                button.textContent = 'Login';
+                button.disabled = false;
+            }
+        }
+
+        function logout() {
+            authToken = null;
+            localStorage.removeItem('admin_token');
+            document.getElementById('login-container').style.display = 'block';
+            document.getElementById('dashboard-container').style.display = 'none';
+        }
+
+        async function showDashboard() {
+            document.getElementById('login-container').style.display = 'none';
+            const dashboard = document.getElementById('dashboard-container');
+            dashboard.style.display = 'block';
+            dashboard.style.opacity = '0';
+            dashboard.style.animation = 'fadeIn 0.6s ease-out';
+            setTimeout(() => {
+                dashboard.style.opacity = '1';
+            }, 10);
+            
+            document.getElementById('api-url').textContent = API_URL;
+
+            await loadStats();
+            await loadComments();
+            await loadUsers();
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_URL}/api/stats`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    const commentsEl = document.getElementById('stat-comments');
+                    const presentEl = document.getElementById('stat-present');
+                    const absentEl = document.getElementById('stat-absent');
+                    const likesEl = document.getElementById('stat-likes');
+
+                    const comments = data.data.comments || 0;
+                    const present = data.data.present || 0;
+                    const absent = data.data.absent || 0;
+                    const likes = data.data.likes || 0;
+
+                    const oldComments = parseInt(commentsEl.textContent) || 0;
+                    const oldPresent = parseInt(presentEl.textContent) || 0;
+                    const oldAbsent = parseInt(absentEl.textContent) || 0;
+                    const oldLikes = parseInt(likesEl.textContent) || 0;
+
+                    animateValue(commentsEl, oldComments, comments, 800);
+                    animateValue(presentEl, oldPresent, present, 800);
+                    animateValue(absentEl, oldAbsent, absent, 800);
+                    animateValue(likesEl, oldLikes, likes, 800);
+                }
+            } catch (error) {
+                console.error('Stats error:', error);
+            }
+        }
+
+        async function loadComments() {
+            const container = document.getElementById('comments-container');
+            const loading = document.getElementById('comments-loading');
+            const errorDiv = document.getElementById('comments-error');
+
+            try {
+                const response = await fetch(`${API_URL}/api/admin/comments?per=100&next=0`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    loading.style.display = 'none';
+                    errorDiv.style.display = 'none';
+
+                    if (data.data.lists.length === 0) {
+                        container.innerHTML = '<p style="text-align: center; color: #718096; padding: 40px;">No comments yet.</p>';
+                        return;
+                    }
+
+                    let html = '<table><thead><tr><th>Name</th><th>Presence</th><th>Comment</th><th>Likes</th><th>Date</th><th>IP</th><th>Actions</th></tr></thead><tbody>';
+                    
+                    data.data.lists.forEach((comment, index) => {
+                        html += renderComment(comment, 0, index);
+                    });
+
+                    html += '</tbody></table>';
+                    container.innerHTML = html;
+                    
+                    // Animate table rows
+                    const rows = container.querySelectorAll('tbody tr');
+                    rows.forEach((row, index) => {
+                        row.style.animationDelay = `${index * 0.05}s`;
+                    });
+                } else {
+                    loading.style.display = 'none';
+                    errorDiv.textContent = data.error?.[0] || 'Failed to load comments';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                errorDiv.textContent = 'Error: ' + error.message;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function renderComment(comment, depth, index) {
+            const indent = depth > 0 ? 'reply-indent' : '';
+            const presenceBadge = comment.presence 
+                ? '<span class="badge badge-success">✓ Will Attend</span>' 
+                : '<span class="badge badge-danger">✗ Won\'t Attend</span>';
+            
+            const date = new Date(comment.created_at).toLocaleString();
+            const commentText = comment.comment || '<em>No comment text</em>';
+            const ipDisplay = comment.ip ? `<small>${comment.ip}</small>` : '-';
+
+            let html = `
+                <tr class="${indent}" id="comment-row-${comment.uuid}" style="animation-delay: ${index * 0.05}s;">
+                    <td><strong>${escapeHtml(comment.name)}</strong> ${comment.is_admin ? '<span class="badge badge-info">Admin</span>' : ''}</td>
+                    <td>${presenceBadge}</td>
+                    <td>${escapeHtml(commentText)}</td>
+                    <td><strong>${comment.like_count || 0}</strong></td>
+                    <td><small>${date}</small></td>
+                    <td>${ipDisplay}</td>
+                    <td class="actions" style="white-space: nowrap;">
+                        <button class="btn btn-primary" onclick="showReplyForm('${comment.uuid}')" style="margin-right: 5px;">Reply</button>
+                        <button class="btn btn-danger" onclick="deleteComment('${comment.uuid}')">Delete</button>
+                    </td>
+                </tr>
+                <tr class="${indent}" id="reply-form-row-${comment.uuid}" style="display: none;">
+                    <td colspan="7">
+                        <div class="reply-form" id="reply-form-${comment.uuid}">
+                            <textarea id="reply-text-${comment.uuid}" placeholder="Type your reply as Sakib&Shabrina..."></textarea>
+                            <div class="btn-group">
+                                <button class="btn btn-primary" onclick="submitReply('${comment.uuid}')">Send Reply</button>
+                                <button class="btn" onclick="hideReplyForm('${comment.uuid}')" style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white;">Cancel</button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+            // Render replies
+            if (comment.comments && comment.comments.length > 0) {
+                comment.comments.forEach((reply, replyIndex) => {
+                    html += renderComment(reply, depth + 1, index + replyIndex + 1);
+                });
+            }
+
+            return html;
+        }
+
+        async function loadUsers() {
+            const container = document.getElementById('users-container');
+            const loading = document.getElementById('users-loading');
+            const errorDiv = document.getElementById('users-error');
+
+            try {
+                const response = await fetch(`${API_URL}/api/admin/users`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    loading.style.display = 'none';
+                    errorDiv.style.display = 'none';
+
+                    const users = data.data || [];
+                    if (users.length === 0) {
+                        container.innerHTML = '<p style="text-align: center; color: #718096; padding: 40px;">No users found.</p>';
+                        return;
+                    }
+
+                    let html = '<table><thead><tr><th>Email</th><th>Access Key</th><th>Settings</th><th>Created</th></tr></thead><tbody>';
+                    users.forEach((user, index) => {
+                        html += `
+                            <tr style="animation-delay: ${index * 0.05}s;">
+                                <td><strong>${escapeHtml(user.email)}</strong></td>
+                                <td><code>${user.access_key}</code></td>
+                                <td>
+                                    <span class="badge ${user.can_reply ? 'badge-success' : 'badge-danger'}">Reply: ${user.can_reply ? '✓' : '✗'}</span>
+                                    <span class="badge ${user.can_edit ? 'badge-success' : 'badge-danger'}">Edit: ${user.can_edit ? '✓' : '✗'}</span>
+                                    <span class="badge ${user.can_delete ? 'badge-success' : 'badge-danger'}">Delete: ${user.can_delete ? '✓' : '✗'}</span>
+                                    <span class="badge ${user.is_confetti_animation ? 'badge-info' : 'badge-danger'}">Confetti: ${user.is_confetti_animation ? '✓' : '✗'}</span>
+                                </td>
+                                <td><small>${new Date(user.created_at).toLocaleString()}</small></td>
+                            </tr>
+                        `;
+                    });
+                    html += '</tbody></table>';
+                    container.innerHTML = html;
+                    
+                    // Animate table rows
+                    const rows = container.querySelectorAll('tbody tr');
+                    rows.forEach((row, index) => {
+                        row.style.animationDelay = `${index * 0.05}s`;
+                    });
+                } else {
+                    loading.style.display = 'none';
+                    errorDiv.textContent = data.error?.[0] || 'Failed to load users';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                errorDiv.textContent = 'Error: ' + error.message;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function showReplyForm(uuid) {
+            const formRow = document.getElementById(`reply-form-row-${uuid}`);
+            const form = document.getElementById(`reply-form-${uuid}`);
+            if (formRow && form) {
+                formRow.style.display = '';
+                form.classList.add('active');
+                setTimeout(() => {
+                    document.getElementById(`reply-text-${uuid}`).focus();
+                }, 100);
+            }
+        }
+
+        function hideReplyForm(uuid) {
+            const formRow = document.getElementById(`reply-form-row-${uuid}`);
+            const form = document.getElementById(`reply-form-${uuid}`);
+            if (formRow && form) {
+                formRow.style.display = 'none';
+                form.classList.remove('active');
+                document.getElementById(`reply-text-${uuid}`).value = '';
+            }
+        }
+
+        async function submitReply(parentUuid) {
+            const textarea = document.getElementById(`reply-text-${parentUuid}`);
+            const comment = textarea.value.trim();
+            const button = event.target;
+
+            if (!comment) {
+                alert('Please enter a reply');
+                return;
+            }
+
+            button.textContent = 'Sending...';
+            button.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/api/admin/reply`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        parent_uuid: parentUuid,
+                        comment: comment
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    textarea.value = '';
+                    hideReplyForm(parentUuid);
+                    alert('Reply posted successfully as Sakib&Shabrina!');
+                    loadComments();
+                    loadStats();
+                } else {
+                    alert('Error: ' + (data.error?.[0] || 'Failed to post reply'));
+                    button.textContent = 'Send Reply';
+                    button.disabled = false;
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+                button.textContent = 'Send Reply';
+                button.disabled = false;
+            }
+        }
+
+        async function deleteComment(uuid) {
+            if (!confirm('Are you sure you want to delete this comment?')) {
+                return;
+            }
+
+            const row = document.getElementById(`comment-row-${uuid}`);
+            if (row) {
+                row.style.opacity = '0.5';
+                row.style.transition = 'opacity 0.3s ease';
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/comment/${uuid}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    if (row) {
+                        row.style.transition = 'all 0.5s ease';
+                        row.style.transform = 'translateX(-100%)';
+                        row.style.opacity = '0';
+                        setTimeout(() => {
+                            loadComments();
+                            loadStats();
+                        }, 500);
+                    } else {
+                        loadComments();
+                        loadStats();
+                    }
+                } else {
+                    const data = await response.json();
+                    alert('Error: ' + (data.error?.[0] || 'Failed to delete'));
+                    if (row) {
+                        row.style.opacity = '1';
+                    }
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+                if (row) {
+                    row.style.opacity = '1';
+                }
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            if (authToken) {
+                loadStats();
+                loadComments();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
