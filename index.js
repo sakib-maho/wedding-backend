@@ -7,6 +7,12 @@ import configRoutes from './routes/config.js';
 import commentRoutes from './routes/comments.js';
 import statsRoutes from './routes/stats.js';
 import adminRoutes from './routes/admin.js';
+import invitationRoutes from './routes/invitations.js';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 dotenv.config();
 
@@ -46,6 +52,11 @@ app.get('/api/cors-test', (req, res) => {
     });
 });
 
+// Invitation page route (before static files)
+app.get('/invitation', (req, res) => {
+    res.sendFile(join(__dirname, 'public', 'invitation.html'));
+});
+
 // Admin dashboard route (before static files)
 app.use('/', adminRoutes);
 
@@ -58,6 +69,7 @@ app.use('/api', configRoutes);
 app.use('/api', commentRoutes);
 app.use('/api', statsRoutes);
 app.use('/api', adminRoutes);
+app.use('/api/invitations', invitationRoutes);
 
 // 404 handler
 app.use((req, res) => {

@@ -129,3 +129,19 @@ CREATE TABLE IF NOT EXISTS config (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+
+-- Invitations table for personalized invitation URLs
+CREATE TABLE IF NOT EXISTS invitations (
+    id SERIAL PRIMARY KEY,
+    token VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    title VARCHAR(255) DEFAULT 'Mr./Mrs./Brother/Sister',
+    is_used BOOLEAN DEFAULT false,
+    used_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes for invitations
+CREATE INDEX IF NOT EXISTS idx_invitations_token ON invitations(token);
+CREATE INDEX IF NOT EXISTS idx_invitations_is_used ON invitations(is_used);

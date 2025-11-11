@@ -884,10 +884,27 @@
             <div id="users-error" class="error" style="display: none;"></div>
             <div id="users-container"></div>
         </div>
-    </div>
+        <div class="section">
+            <h2>🎫 Invitations</h2>
+            <div style="margin-bottom: 20px;">
+                <div style="margin-bottom: 10px;">
+                    <input type="text" id="invitation-name-input" placeholder="Enter guest name" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 300px; margin-right: 10px;">
+                    <input type="text" id="invitation-prefix-input" placeholder="Prefix (e.g., To, Dear)" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 200px; margin-right: 10px;" value="To">
+                    <input type="text" id="invitation-title-input" placeholder="Title (e.g., Mr./Mrs./Brother/Sister)" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 300px; margin-right: 10px;" value="Mr./Mrs./Brother/Sister">
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <small style="color: #666; display: block; margin-bottom: 5px;">💡 Tip: Prefix can be "To", "Dear", or any custom text. Title can be "Mr.", "Mrs.", "Brother", "Sister", "Uncle", "Aunt", etc.</small>
+                </div>
+                <button onclick="createInvitation()" style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Create Invitation</button>
+            </div>
+            <div id="invitations-loading" class="loading">Loading invitations...</div>
+            <div id="invitations-error" class="error" style="display: none;"></div>
+            <div id="invitations-container"></div>
+        </div>
 
     <script>
         const API_URL = window.location.origin;
+        const FRONTEND_URL = "https://sakib-maho.github.io/undangan";
         let authToken = localStorage.getItem('admin_token');
 
         // Animate number counting
@@ -962,6 +979,170 @@
             document.getElementById('dashboard-container').style.display = 'none';
         }
 
+        
+                // Invitations Management
+        async function loadInvitations() {
+            const container = document.getElementById("invitations-container");
+            const loading = document.getElementById("invitations-loading");
+            const error = document.getElementById("invitations-error");
+            loading.style.display = "block";
+            error.style.display = "none";
+            container.innerHTML = "";
+            try {
+                const response = await fetch(`${API_URL}/api/invitations`, {
+                    headers: { "Authorization": `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    loading.style.display = "none";
+                    if (data.data && data.data.length > 0) {
+                        let html = "<table><thead><tr><th>Name</th><th>Invitation URL</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody>";
+                        data.data.forEach(inv => {
+                            const prefix = inv.prefix || "To";
+                            const title = inv.title || "";
+                            // Only include title in URL if it's not empty and not the default placeholder
+                            const titleParam = (title && title.trim() !== "" && title !== "Mr./Mrs./Brother/Sister") 
+                                ? `&title=${encodeURIComponent(title)}` 
+                                : "";
+                            const url = `${FRONTEND_URL}/invitation.html?token=${inv.token}&name=${encodeURIComponent(inv.name)}&prefix=${encodeURIComponent(prefix)}${titleParam}`;
+                            const status = inv.is_used ? "<span style=\"color: #999;\">Used</span>" : "<span style=\"color: #4CAF50;\">Active</span>";
+                            const createdDate = new Date(inv.created_at).toLocaleDateString();
+                            const buttonId = `copy-btn-${inv.id}`;
+                            html += `<tr><td>${escapeHtml(inv.name)}</td><td><input type=\"text\" value=\"${escapeHtml(url)}\" readonly style=\"width: 400px; padding: 5px;\" onclick=\"this.select();\"></td><td>${status}</td><td>${createdDate}</td><td><button id=\"${buttonId}\" data-url=\"${escapeHtml(url)}\" onclick=\"copyInvitationUrl(this)\">Copy</button> <button onclick=\"deleteInvitation(${inv.id})\" style=\"background: #f44336;\">Delete</button></td></tr>`;
+                        });
+                        html += "</tbody></table>";
+                        container.innerHTML = html;
+                    } else {
+                        container.innerHTML = "<p>No invitations created yet.</p>";
+                    }
+                } else {
+                    throw new Error(data.error?.[0] || "Failed to load invitations");
+                }
+            } catch (err) {
+                loading.style.display = "none";
+                error.textContent = "Error: " + err.message;
+                error.style.display = "block";
+            }
+        }
+        
+        async function createInvitation() {
+            const nameInput = document.getElementById("invitation-name-input");
+            const prefixInput = document.getElementById("invitation-prefix-input");
+            const titleInput = document.getElementById("invitation-title-input");
+            const name = nameInput.value.trim();
+            const prefix = prefixInput.value.trim() || "To";
+            const title = titleInput.value.trim() || "Mr./Mrs./Brother/Sister";
+            
+            if (!name) {
+                alert("Please enter a guest name");
+                return;
+            }
+            try {
+                const response = await fetch(`${API_URL}/api/invitations`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ name, prefix, title })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    nameInput.value = "";
+                    prefixInput.value = "To";
+                    titleInput.value = "Mr./Mrs./Brother/Sister";
+                    alert("Invitation created successfully!");
+                    loadInvitations();
+                } else {
+                    alert("Error: " + (data.error?.[0] || "Failed to create invitation"));
+                }
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        }
+        
+        async function deleteInvitation(id) {
+            if (!confirm("Are you sure you want to delete this invitation?")) {
+                return;
+            }
+            try {
+                const response = await fetch(`${API_URL}/api/invitations/${id}`, {
+                    method: "DELETE",
+                    headers: { "Authorization": `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    alert("Invitation deleted successfully!");
+                    loadInvitations();
+                } else {
+                    alert("Error: " + (data.error?.[0] || "Failed to delete invitation"));
+                }
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        }
+        
+        function copyInvitationUrl(button) {
+            const url = button.getAttribute('data-url');
+            const originalText = button.textContent;
+            
+            if (!url) {
+                alert('URL not found');
+                return;
+            }
+            
+            // Try modern clipboard API first
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(() => {
+                    button.textContent = 'Copied!';
+                    button.style.background = '#4CAF50';
+                    button.style.color = 'white';
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.style.background = '';
+                        button.style.color = '';
+                    }, 2000);
+                }).catch(() => {
+                    // Fallback to textarea method
+                    fallbackCopy(url, button, originalText);
+                });
+            } else {
+                // Fallback to textarea method
+                fallbackCopy(url, button, originalText);
+            }
+        }
+        
+        function fallbackCopy(url, button, originalText) {
+            const textarea = document.createElement('textarea');
+            textarea.value = url;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-999999px';
+            textarea.style.top = '-999999px';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    button.textContent = 'Copied!';
+                    button.style.background = '#4CAF50';
+                    button.style.color = 'white';
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.style.background = '';
+                        button.style.color = '';
+                    }, 2000);
+                } else {
+                    alert('Failed to copy. Please copy manually from the input field.');
+                }
+            } catch (err) {
+                alert('Failed to copy. Please copy manually from the input field.');
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        }
+        
         async function showDashboard() {
             document.getElementById('login-container').style.display = 'none';
             const dashboard = document.getElementById('dashboard-container');
@@ -977,6 +1158,7 @@
             await loadStats();
             await loadComments();
             await loadUsers();
+            await loadInvitations();
         }
 
         async function loadStats() {
@@ -1275,11 +1457,10 @@
         }
 
         function escapeHtml(text) {
-            const div = document.createElement('div');
+            const div = document.createElement("div");
             div.textContent = text;
             return div.innerHTML;
         }
-
         // Auto-refresh every 30 seconds
         setInterval(() => {
             if (authToken) {
